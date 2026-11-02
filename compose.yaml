@@ -1,0 +1,29 @@
+services:
+  sim:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    platform: linux/arm64
+    init: true
+    shm_size: 1gb
+    ports:
+      - "127.0.0.1:6080:6080"
+    environment:
+      DISPLAY: ":1"
+      LIBGL_ALWAYS_SOFTWARE: "1"
+      QT_X11_NO_MITSHM: "1"
+      QT_QPA_PLATFORM: xcb
+      ROS_DOMAIN_ID: "42"
+      GZ_PARTITION: pai_lab
+    volumes:
+      - ./simulation:/work/simulation:ro
+      - ./scripts:/work/scripts:ro
+      - ./ros2_ws:/work/ros2_ws
+      - ./output:/work/output
+    working_dir: /work/ros2_ws
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:6080/vnc.html"]
+      interval: 10s
+      timeout: 3s
+      retries: 6
+      start_period: 30s
